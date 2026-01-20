@@ -36,13 +36,16 @@ import org.apache.ibatis.session.RowBounds;
 public class DefaultCursor<T> implements Cursor<T> {
 
   // ResultSetHandler stuff
+  //结果集处理器
   private final DefaultResultSetHandler resultSetHandler;
   private final ResultMap resultMap;
   private final ResultSetWrapper rsw;
   private final RowBounds rowBounds;
   protected final ObjectWrapperResultHandler<T> objectWrapperResultHandler = new ObjectWrapperResultHandler<>();
 
+  //迭代器
   private final CursorIterator cursorIterator = new CursorIterator();
+
   private boolean iteratorRetrieved;
 
   private CursorStatus status = CursorStatus.CREATED;
@@ -69,7 +72,7 @@ public class DefaultCursor<T> implements Cursor<T> {
   }
 
   public DefaultCursor(DefaultResultSetHandler resultSetHandler, ResultMap resultMap, ResultSetWrapper rsw,
-      RowBounds rowBounds) {
+                       RowBounds rowBounds) {
     this.resultSetHandler = resultSetHandler;
     this.resultMap = resultMap;
     this.rsw = rsw;

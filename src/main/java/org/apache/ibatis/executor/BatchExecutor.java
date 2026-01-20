@@ -36,15 +36,21 @@ import org.apache.ibatis.session.RowBounds;
 import org.apache.ibatis.transaction.Transaction;
 
 /**
+ * 批量执行器
+ * 只支持 insert update delete 不支持select操作
  * @author Jeff Butler
  */
 public class BatchExecutor extends BaseExecutor {
 
   public static final int BATCH_UPDATE_RETURN_VALUE = Integer.MIN_VALUE + 1002;
 
+  //缓存多个Statement 每个Statement里面可以有多个结构相同但是参数不同的sql
   private final List<Statement> statementList = new ArrayList<>();
+  //批量结果
   private final List<BatchResult> batchResultList = new ArrayList<>();
+  //当前执行的sql
   private String currentSql;
+  //当前执行的MappedStatement
   private MappedStatement currentStatement;
 
   public BatchExecutor(Configuration configuration, Transaction transaction) {
@@ -54,14 +60,16 @@ public class BatchExecutor extends BaseExecutor {
   @Override
   public int doUpdate(MappedStatement ms, Object parameterObject) throws SQLException {
     final Configuration configuration = ms.getConfiguration();
-    final StatementHandler handler = configuration.newStatementHandler(this, ms, parameterObject, RowBounds.DEFAULT,
-        null, null);
+    final StatementHandler handler = configuration.newStatementHandler(this, ms, parameterObject, RowBounds.DEFAULT, null, null);
     final BoundSql boundSql = handler.getBoundSql();
     final String sql = boundSql.getSql();
     final Statement stmt;
+    //是否与上次相同
     if (sql.equals(currentSql) && ms.equals(currentStatement)) {
+      //相同添加到同一个
       int last = statementList.size() - 1;
       stmt = statementList.get(last);
+      //重新设置事务超时时间
       applyTransactionTimeout(stmt);
       handler.parameterize(stmt);// fix Issues 322
       BatchResult batchResult = batchResultList.get(last);
@@ -81,13 +89,13 @@ public class BatchExecutor extends BaseExecutor {
 
   @Override
   public <E> List<E> doQuery(MappedStatement ms, Object parameterObject, RowBounds rowBounds,
-      ResultHandler resultHandler, BoundSql boundSql) throws SQLException {
+                             ResultHandler resultHandler, BoundSql boundSql) throws SQLException {
     Statement stmt = null;
     try {
       flushStatements();
       Configuration configuration = ms.getConfiguration();
       StatementHandler handler = configuration.newStatementHandler(wrapper, ms, parameterObject, rowBounds,
-          resultHandler, boundSql);
+        resultHandler, boundSql);
       Connection connection = getConnection(ms.getStatementLog());
       stmt = handler.prepare(connection, transaction.getTimeout());
       handler.parameterize(stmt);
@@ -99,7 +107,7 @@ public class BatchExecutor extends BaseExecutor {
 
   @Override
   protected <E> Cursor<E> doQueryCursor(MappedStatement ms, Object parameter, RowBounds rowBounds, BoundSql boundSql)
-      throws SQLException {
+    throws SQLException {
     flushStatements();
     Configuration configuration = ms.getConfiguration();
     StatementHandler handler = configuration.newStatementHandler(wrapper, ms, parameter, rowBounds, null, boundSql);
@@ -140,10 +148,10 @@ public class BatchExecutor extends BaseExecutor {
         } catch (BatchUpdateException e) {
           StringBuilder message = new StringBuilder();
           message.append(batchResult.getMappedStatement().getId()).append(" (batch index #").append(i + 1).append(")")
-              .append(" failed.");
+            .append(" failed.");
           if (i > 0) {
             message.append(" ").append(i)
-                .append(" prior sub executor(s) completed successfully, but will be rolled back.");
+              .append(" prior sub executor(s) completed successfully, but will be rolled back.");
           }
           throw new BatchExecutorException(message.toString(), e, results, batchResult);
         }

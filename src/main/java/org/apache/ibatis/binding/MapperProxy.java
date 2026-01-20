@@ -36,8 +36,12 @@ public class MapperProxy<T> implements InvocationHandler, Serializable {
 
   private static final long serialVersionUID = -4724728412955527868L;
   private static final Method privateLookupInMethod;
+
+  //当前会话对象
   private final SqlSession sqlSession;
+  //Mapper接口类型
   private final Class<T> mapperInterface;
+  //方法缓存
   private final Map<Method, MapperMethodInvoker> methodCache;
 
   public MapperProxy(SqlSession sqlSession, Class<T> mapperInterface, Map<Method, MapperMethodInvoker> methodCache) {
@@ -85,14 +89,12 @@ public class MapperProxy<T> implements InvocationHandler, Serializable {
     }
   }
 
-  private MethodHandle getMethodHandleJava9(Method method)
-      throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+  private MethodHandle getMethodHandleJava9(Method method) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
     final Class<?> declaringClass = method.getDeclaringClass();
-    return ((Lookup) privateLookupInMethod.invoke(null, declaringClass, MethodHandles.lookup())).findSpecial(
-        declaringClass, method.getName(), MethodType.methodType(method.getReturnType(), method.getParameterTypes()),
-        declaringClass);
+    return ((Lookup) privateLookupInMethod.invoke(null, declaringClass, MethodHandles.lookup())).findSpecial(declaringClass, method.getName(), MethodType.methodType(method.getReturnType(), method.getParameterTypes()), declaringClass);
   }
 
+  //普通方法
   private static class PlainMethodInvoker implements MapperMethodInvoker {
     private final MapperMethod mapperMethod;
 
@@ -106,6 +108,7 @@ public class MapperProxy<T> implements InvocationHandler, Serializable {
     }
   }
 
+  //默认方法
   private static class DefaultMethodInvoker implements MapperMethodInvoker {
     private final MethodHandle methodHandle;
 

@@ -32,6 +32,8 @@ import org.apache.ibatis.session.RowBounds;
 import org.apache.ibatis.transaction.Transaction;
 
 /**
+ * Executor简单实现
+ *
  * @author Clinton Begin
  */
 public class SimpleExecutor extends BaseExecutor {
@@ -54,23 +56,26 @@ public class SimpleExecutor extends BaseExecutor {
   }
 
   @Override
-  public <E> List<E> doQuery(MappedStatement ms, Object parameter, RowBounds rowBounds, ResultHandler resultHandler,
-      BoundSql boundSql) throws SQLException {
+  public <E> List<E> doQuery(MappedStatement ms, Object parameter, RowBounds rowBounds, ResultHandler resultHandler, BoundSql boundSql) throws SQLException {
     Statement stmt = null;
     try {
+      //拿到配置
       Configuration configuration = ms.getConfiguration();
-      StatementHandler handler = configuration.newStatementHandler(wrapper, ms, parameter, rowBounds, resultHandler,
-          boundSql);
+      //新建一个StatementHandler对象
+      StatementHandler handler = configuration.newStatementHandler(wrapper, ms, parameter, rowBounds, resultHandler, boundSql);
+      //完成Statement的创建和初始化
       stmt = prepareStatement(handler, ms.getStatementLog());
+      //完成结果集的映射
       return handler.query(stmt, resultHandler);
     } finally {
+      //关闭Statement对象
       closeStatement(stmt);
     }
   }
 
   @Override
   protected <E> Cursor<E> doQueryCursor(MappedStatement ms, Object parameter, RowBounds rowBounds, BoundSql boundSql)
-      throws SQLException {
+    throws SQLException {
     Configuration configuration = ms.getConfiguration();
     StatementHandler handler = configuration.newStatementHandler(wrapper, ms, parameter, rowBounds, null, boundSql);
     Statement stmt = prepareStatement(handler, ms.getStatementLog());
@@ -81,13 +86,16 @@ public class SimpleExecutor extends BaseExecutor {
 
   @Override
   public List<BatchResult> doFlushStatements(boolean isRollback) {
+    //不支持sql语句批处理
     return Collections.emptyList();
   }
 
   private Statement prepareStatement(StatementHandler handler, Log statementLog) throws SQLException {
     Statement stmt;
     Connection connection = getConnection(statementLog);
+    //创建Statement对象
     stmt = handler.prepare(connection, transaction.getTimeout());
+    //处理占位符
     handler.parameterize(stmt);
     return stmt;
   }

@@ -19,6 +19,7 @@ import java.sql.Connection;
 
 /**
  * Creates an {@link SqlSession} out of a connection or a DataSource
+ * 创建一个SqlSession, 基于一个连接或数据源
  *
  * @author Clinton Begin
  */

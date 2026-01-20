@@ -31,11 +31,8 @@ public class SqlSourceBuilder {
     super();
   }
 
-  public static SqlSource buildSqlSource(Configuration configuration, String sql,
-      List<ParameterMapping> parameterMappings) {
-    return new StaticSqlSource(configuration,
-        configuration.isShrinkWhitespacesInSql() ? SqlSourceBuilder.removeExtraWhitespaces(sql) : sql,
-        parameterMappings);
+  public static SqlSource buildSqlSource(Configuration configuration, String sql, List<ParameterMapping> parameterMappings) {
+    return new StaticSqlSource(configuration, configuration.isShrinkWhitespacesInSql() ? SqlSourceBuilder.removeExtraWhitespaces(sql) : sql, parameterMappings);
   }
 
   public static String removeExtraWhitespaces(String original) {

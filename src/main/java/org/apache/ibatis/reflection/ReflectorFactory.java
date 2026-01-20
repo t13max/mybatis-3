@@ -17,6 +17,12 @@ package org.apache.ibatis.reflection;
 
 import java.lang.reflect.Type;
 
+/**
+ * Reflector工厂
+ *
+ * @Author t13max
+ * @Date 13:33 2026/1/20
+ */
 public interface ReflectorFactory {
 
   boolean isClassCacheEnabled();

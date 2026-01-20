@@ -33,12 +33,15 @@ import org.apache.ibatis.session.RowBounds;
 import org.apache.ibatis.transaction.Transaction;
 
 /**
+ * 缓存执行器
+ *
  * @author Clinton Begin
  * @author Eduardo Macarron
  */
 public class CachingExecutor implements Executor {
 
   private final Executor delegate;
+  //缓存管理器
   private final TransactionalCacheManager tcm = new TransactionalCacheManager();
 
   public CachingExecutor(Executor delegate) {
@@ -84,15 +87,14 @@ public class CachingExecutor implements Executor {
 
   @Override
   public <E> List<E> query(MappedStatement ms, Object parameterObject, RowBounds rowBounds, ResultHandler resultHandler)
-      throws SQLException {
+    throws SQLException {
     BoundSql boundSql = ms.getBoundSql(parameterObject);
     CacheKey key = createCacheKey(ms, parameterObject, rowBounds, boundSql);
     return query(ms, parameterObject, rowBounds, resultHandler, key, boundSql);
   }
 
   @Override
-  public <E> List<E> query(MappedStatement ms, Object parameterObject, RowBounds rowBounds, ResultHandler resultHandler,
-      CacheKey key, BoundSql boundSql) throws SQLException {
+  public <E> List<E> query(MappedStatement ms, Object parameterObject, RowBounds rowBounds, ResultHandler resultHandler, CacheKey key, BoundSql boundSql) throws SQLException {
     Cache cache = ms.getCache();
     if (cache != null) {
       flushCacheIfRequired(ms);
@@ -137,8 +139,8 @@ public class CachingExecutor implements Executor {
       for (ParameterMapping parameterMapping : boundSql.getParameterMappings()) {
         if (parameterMapping.getMode() != ParameterMode.IN) {
           throw new ExecutorException(
-              "Caching stored procedures with OUT params is not supported.  Please configure useCache=false in "
-                  + ms.getId() + " statement.");
+            "Caching stored procedures with OUT params is not supported.  Please configure useCache=false in "
+              + ms.getId() + " statement.");
         }
       }
     }
@@ -156,7 +158,7 @@ public class CachingExecutor implements Executor {
 
   @Override
   public void deferLoad(MappedStatement ms, MetaObject resultObject, String property, CacheKey key,
-      Class<?> targetType) {
+                        Class<?> targetType) {
     delegate.deferLoad(ms, resultObject, property, key, targetType);
   }
 

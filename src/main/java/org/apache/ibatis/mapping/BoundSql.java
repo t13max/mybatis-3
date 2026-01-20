@@ -29,6 +29,8 @@ import org.apache.ibatis.session.Configuration;
  * least the property name of the input object to read the value from).
  * <p>
  * Can also have additional parameters that are created by the dynamic language (for loops, bind...).
+ * <p>
+ * 真正的sql语句
  *
  * @author Clinton Begin
  */
@@ -41,7 +43,7 @@ public class BoundSql {
   private final MetaObject metaParameters;
 
   public BoundSql(Configuration configuration, String sql, List<ParameterMapping> parameterMappings,
-      Object parameterObject) {
+                  Object parameterObject) {
     this.sql = sql;
     this.parameterMappings = parameterMappings;
     this.parameterObject = parameterObject;

@@ -30,19 +30,25 @@ import org.apache.ibatis.executor.BatchResult;
 import org.apache.ibatis.reflection.ExceptionUtil;
 
 /**
+ * 同时实现了 SqlSessionFactory 和 SqlSession 接口
+ * 1. 作为 SqlSessionFactory, 用于创建 SqlSession 对象
+ * 2. 作为 SqlSession, 用于执行数据库操作
+ *
  * @author Larry Meadors
  */
 public class SqlSessionManager implements SqlSessionFactory, SqlSession {
 
+  //工厂
   private final SqlSessionFactory sqlSessionFactory;
+  //代理SqlSession
   private final SqlSession sqlSessionProxy;
-
+  //线程私有的SqlSession
   private final ThreadLocal<SqlSession> localSqlSession = new ThreadLocal<>();
 
   private SqlSessionManager(SqlSessionFactory sqlSessionFactory) {
     this.sqlSessionFactory = sqlSessionFactory;
     this.sqlSessionProxy = (SqlSession) Proxy.newProxyInstance(SqlSessionFactory.class.getClassLoader(),
-        new Class[] { SqlSession.class }, new SqlSessionInterceptor());
+      new Class[]{SqlSession.class}, new SqlSessionInterceptor());
   }
 
   public static SqlSessionManager newInstance(Reader reader) {
@@ -335,6 +341,7 @@ public class SqlSessionManager implements SqlSessionFactory, SqlSession {
     }
   }
 
+  //动态代理类
   private class SqlSessionInterceptor implements InvocationHandler {
     public SqlSessionInterceptor() {
       // Prevent Synthetic Access
@@ -343,6 +350,7 @@ public class SqlSessionManager implements SqlSessionFactory, SqlSession {
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
       final SqlSession sqlSession = SqlSessionManager.this.localSqlSession.get();
+      //存在则直接调用方法
       if (sqlSession != null) {
         try {
           return method.invoke(sqlSession, args);
@@ -350,6 +358,7 @@ public class SqlSessionManager implements SqlSessionFactory, SqlSession {
           throw ExceptionUtil.unwrapThrowable(t);
         }
       }
+      //不存在, 新建
       try (SqlSession autoSqlSession = openSession()) {
         try {
           final Object result = method.invoke(autoSqlSession, args);

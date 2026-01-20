@@ -40,6 +40,7 @@ import org.apache.ibatis.session.SqlSession;
 
 /**
  * The default implementation for {@link SqlSession}. Note that this class is not Thread-Safe.
+ * SqlSession默认实现
  *
  * @author Clinton Begin
  */
@@ -77,7 +78,7 @@ public class DefaultSqlSession implements SqlSession {
     }
     if (list.size() > 1) {
       throw new TooManyResultsException(
-          "Expected one result (or null) to be returned by selectOne(), but found: " + list.size());
+        "Expected one result (or null) to be returned by selectOne(), but found: " + list.size());
     } else {
       return null;
     }
@@ -97,7 +98,7 @@ public class DefaultSqlSession implements SqlSession {
   public <K, V> Map<K, V> selectMap(String statement, Object parameter, String mapKey, RowBounds rowBounds) {
     final List<? extends V> list = selectList(statement, parameter, rowBounds);
     final DefaultMapResultHandler<K, V> mapResultHandler = new DefaultMapResultHandler<>(mapKey,
-        configuration.getObjectFactory(), configuration.getObjectWrapperFactory(), configuration.getReflectorFactory());
+      configuration.getObjectFactory(), configuration.getObjectWrapperFactory(), configuration.getReflectorFactory());
     final DefaultResultContext<V> context = new DefaultResultContext<>();
     for (V o : list) {
       context.nextResultObject(o);
@@ -188,11 +189,14 @@ public class DefaultSqlSession implements SqlSession {
     return update(statement, null);
   }
 
+  //所有写操作最终都调到update
   @Override
   public int update(String statement, Object parameter) {
     try {
+      //标记为脏
       dirty = true;
       MappedStatement ms = configuration.getMappedStatement(statement);
+      //调用executor的update
       return executor.update(ms, wrapCollection(parameter));
     } catch (Exception e) {
       throw ExceptionFactory.wrapException("Error updating database.  Cause: " + e, e);

@@ -34,10 +34,13 @@ import org.apache.ibatis.session.RowBounds;
 import org.apache.ibatis.transaction.Transaction;
 
 /**
+ * 可复用Executor
+ *
  * @author Clinton Begin
  */
 public class ReuseExecutor extends BaseExecutor {
 
+  //缓存Statement
   private final Map<String, Statement> statementMap = new HashMap<>();
 
   public ReuseExecutor(Configuration configuration, Transaction transaction) {
@@ -53,18 +56,16 @@ public class ReuseExecutor extends BaseExecutor {
   }
 
   @Override
-  public <E> List<E> doQuery(MappedStatement ms, Object parameter, RowBounds rowBounds, ResultHandler resultHandler,
-      BoundSql boundSql) throws SQLException {
+  public <E> List<E> doQuery(MappedStatement ms, Object parameter, RowBounds rowBounds, ResultHandler resultHandler, BoundSql boundSql) throws SQLException {
     Configuration configuration = ms.getConfiguration();
-    StatementHandler handler = configuration.newStatementHandler(wrapper, ms, parameter, rowBounds, resultHandler,
-        boundSql);
+    StatementHandler handler = configuration.newStatementHandler(wrapper, ms, parameter, rowBounds, resultHandler, boundSql);
     Statement stmt = prepareStatement(handler, ms.getStatementLog());
     return handler.query(stmt, resultHandler);
   }
 
   @Override
   protected <E> Cursor<E> doQueryCursor(MappedStatement ms, Object parameter, RowBounds rowBounds, BoundSql boundSql)
-      throws SQLException {
+    throws SQLException {
     Configuration configuration = ms.getConfiguration();
     StatementHandler handler = configuration.newStatementHandler(wrapper, ms, parameter, rowBounds, null, boundSql);
     Statement stmt = prepareStatement(handler, ms.getStatementLog());
@@ -73,9 +74,11 @@ public class ReuseExecutor extends BaseExecutor {
 
   @Override
   public List<BatchResult> doFlushStatements(boolean isRollback) {
+    //遍历关闭
     for (Statement stmt : statementMap.values()) {
       closeStatement(stmt);
     }
+    //清空
     statementMap.clear();
     return Collections.emptyList();
   }
@@ -83,15 +86,23 @@ public class ReuseExecutor extends BaseExecutor {
   private Statement prepareStatement(StatementHandler handler, Log statementLog) throws SQLException {
     Statement stmt;
     BoundSql boundSql = handler.getBoundSql();
+    //拿到sql
     String sql = boundSql.getSql();
+    //检查是否存在且没有关闭
     if (hasStatementFor(sql)) {
+      //从缓存获取
       stmt = getStatement(sql);
+      //修改超时时间
       applyTransactionTimeout(stmt);
     } else {
+      //获取数据库连接
       Connection connection = getConnection(statementLog);
+      //创建Statement对象
       stmt = handler.prepare(connection, transaction.getTimeout());
+      //放入缓存
       putStatement(sql, stmt);
     }
+    //处理占位符
     handler.parameterize(stmt);
     return stmt;
   }

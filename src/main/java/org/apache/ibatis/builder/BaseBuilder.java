@@ -33,8 +33,12 @@ import org.apache.ibatis.type.TypeHandlerRegistry;
  * @author Clinton Begin
  */
 public abstract class BaseBuilder {
+
+  //核心配置
   protected final Configuration configuration;
+  //别名注册中心
   protected final TypeAliasRegistry typeAliasRegistry;
+  //TypeHandler注册中心
   protected final TypeHandlerRegistry typeHandlerRegistry;
 
   public BaseBuilder(Configuration configuration) {
@@ -120,13 +124,13 @@ public abstract class BaseBuilder {
     typeHandlerType = resolveClass(typeHandlerAlias);
     if (typeHandlerType != null && !TypeHandler.class.isAssignableFrom(typeHandlerType)) {
       throw new BuilderException("Type " + typeHandlerType.getName()
-          + " is not a valid TypeHandler because it does not implement TypeHandler interface");
+        + " is not a valid TypeHandler because it does not implement TypeHandler interface");
     }
     return resolveTypeHandler(propertyType, jdbcType, typeHandlerType);
   }
 
   protected TypeHandler<?> resolveTypeHandler(Type javaType, JdbcType jdbcType,
-      Class<? extends TypeHandler<?>> typeHandlerType) {
+                                              Class<? extends TypeHandler<?>> typeHandlerType) {
     if (typeHandlerType == null && jdbcType == null) {
       return null;
     }

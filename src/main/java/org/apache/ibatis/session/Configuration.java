@@ -721,10 +721,8 @@ public class Configuration {
     return (ResultSetHandler) interceptorChain.pluginAll(resultSetHandler);
   }
 
-  public StatementHandler newStatementHandler(Executor executor, MappedStatement mappedStatement,
-      Object parameterObject, RowBounds rowBounds, ResultHandler resultHandler, BoundSql boundSql) {
-    StatementHandler statementHandler = new RoutingStatementHandler(executor, mappedStatement, parameterObject,
-        rowBounds, resultHandler, boundSql);
+  public StatementHandler newStatementHandler(Executor executor, MappedStatement mappedStatement, Object parameterObject, RowBounds rowBounds, ResultHandler resultHandler, BoundSql boundSql) {
+    StatementHandler statementHandler = new RoutingStatementHandler(executor, mappedStatement, parameterObject, rowBounds, resultHandler, boundSql);
     return (StatementHandler) interceptorChain.pluginAll(statementHandler);
   }
 

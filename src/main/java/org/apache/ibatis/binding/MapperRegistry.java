@@ -27,13 +27,17 @@ import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.SqlSession;
 
 /**
+ * Mapper注册中心
+ *
  * @author Clinton Begin
  * @author Eduardo Macarron
  * @author Lasse Voss
  */
 public class MapperRegistry {
 
+  //配置
   private final Configuration config;
+  //类型->工厂
   private final Map<Class<?>, MapperProxyFactory<?>> knownMappers = new ConcurrentHashMap<>();
 
   public MapperRegistry(Configuration config) {
@@ -69,6 +73,7 @@ public class MapperRegistry {
         // otherwise the binding may automatically be attempted by the
         // mapper parser. If the type is already known, it won't try.
         MapperAnnotationBuilder parser = new MapperAnnotationBuilder(config, type);
+        //解析注解并注册
         parser.parse();
         loadCompleted = true;
       } finally {
@@ -83,7 +88,6 @@ public class MapperRegistry {
    * Gets the mappers.
    *
    * @return the mappers
-   *
    * @since 3.2.2
    */
   public Collection<Class<?>> getMappers() {
@@ -93,11 +97,8 @@ public class MapperRegistry {
   /**
    * Adds the mappers.
    *
-   * @param packageName
-   *          the package name
-   * @param superType
-   *          the super type
-   *
+   * @param packageName the package name
+   * @param superType   the super type
    * @since 3.2.2
    */
   public void addMappers(String packageName, Class<?> superType) {
@@ -112,9 +113,7 @@ public class MapperRegistry {
   /**
    * Adds the mappers.
    *
-   * @param packageName
-   *          the package name
-   *
+   * @param packageName the package name
    * @since 3.2.2
    */
   public void addMappers(String packageName) {

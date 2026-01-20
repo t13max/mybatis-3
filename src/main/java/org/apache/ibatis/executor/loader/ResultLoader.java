@@ -35,6 +35,8 @@ import org.apache.ibatis.transaction.Transaction;
 import org.apache.ibatis.transaction.TransactionFactory;
 
 /**
+ * 结果懒加载
+ *
  * @author Clinton Begin
  */
 public class ResultLoader {
@@ -54,7 +56,7 @@ public class ResultLoader {
   protected Object resultObject;
 
   public ResultLoader(Configuration config, Executor executor, MappedStatement mappedStatement, Object parameterObject,
-      Class<?> targetType, CacheKey cacheKey, BoundSql boundSql) {
+                      Class<?> targetType, CacheKey cacheKey, BoundSql boundSql) {
     this.configuration = config;
     this.executor = executor;
     this.mappedStatement = mappedStatement;
@@ -80,7 +82,7 @@ public class ResultLoader {
     }
     try {
       return localExecutor.query(mappedStatement, parameterObject, RowBounds.DEFAULT, Executor.NO_RESULT_HANDLER,
-          cacheKey, boundSql);
+        cacheKey, boundSql);
     } finally {
       if (localExecutor != executor) {
         localExecutor.close(false);
