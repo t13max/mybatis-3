@@ -33,6 +33,8 @@ import org.apache.ibatis.session.ResultHandler;
 import org.apache.ibatis.session.RowBounds;
 
 /**
+ * PreparedStatement 处理器
+ *
  * @author Clinton Begin
  */
 public class PreparedStatementHandler extends BaseStatementHandler {
@@ -76,10 +78,13 @@ public class PreparedStatementHandler extends BaseStatementHandler {
   protected Statement instantiateStatement(Connection connection) throws SQLException {
     String sql = boundSql.getSql();
     if (mappedStatement.getKeyGenerator() instanceof Jdbc3KeyGenerator) {
+      //获取主键列
       String[] keyColumnNames = mappedStatement.getKeyColumns();
       if (keyColumnNames == null) {
+        //返回主键
         return connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
       } else {
+        //keyColumnNames指定列
         return connection.prepareStatement(sql, keyColumnNames);
       }
     }
@@ -87,12 +92,13 @@ public class PreparedStatementHandler extends BaseStatementHandler {
       return connection.prepareStatement(sql);
     } else {
       return connection.prepareStatement(sql, mappedStatement.getResultSetType().getValue(),
-          ResultSet.CONCUR_READ_ONLY);
+        ResultSet.CONCUR_READ_ONLY);
     }
   }
 
   @Override
   public void parameterize(Statement statement) throws SQLException {
+    //绑定参数 处理占位符
     parameterHandler.setParameters((PreparedStatement) statement);
   }
 

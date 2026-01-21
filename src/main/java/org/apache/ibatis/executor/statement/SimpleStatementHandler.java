@@ -33,24 +33,32 @@ import org.apache.ibatis.session.ResultHandler;
 import org.apache.ibatis.session.RowBounds;
 
 /**
+ * 简单实现 底层使用Statement执行SQL
+ * 所以parameterize是空实现
+ *
  * @author Clinton Begin
  */
 public class SimpleStatementHandler extends BaseStatementHandler {
 
   public SimpleStatementHandler(Executor executor, MappedStatement mappedStatement, Object parameter,
-      RowBounds rowBounds, ResultHandler resultHandler, BoundSql boundSql) {
+                                RowBounds rowBounds, ResultHandler resultHandler, BoundSql boundSql) {
     super(executor, mappedStatement, parameter, rowBounds, resultHandler, boundSql);
   }
 
   @Override
   public int update(Statement statement) throws SQLException {
+    //sql
     String sql = boundSql.getSql();
     Object parameterObject = boundSql.getParameterObject();
+    //主键
     KeyGenerator keyGenerator = mappedStatement.getKeyGenerator();
     int rows;
     if (keyGenerator instanceof Jdbc3KeyGenerator) {
+      //执行sql 返回主键
       statement.execute(sql, Statement.RETURN_GENERATED_KEYS);
+      //获取影响行数
       rows = statement.getUpdateCount();
+      //填充主键
       keyGenerator.processAfter(executor, mappedStatement, statement, parameterObject);
     } else if (keyGenerator instanceof SelectKeyGenerator) {
       statement.execute(sql);
@@ -86,14 +94,16 @@ public class SimpleStatementHandler extends BaseStatementHandler {
   @Override
   protected Statement instantiateStatement(Connection connection) throws SQLException {
     if (mappedStatement.getResultSetType() == ResultSetType.DEFAULT) {
+      //如果结果集是默认类型 则直接通过connection创建Statement
       return connection.createStatement();
     }
+    //否则设置结果集类型 只读
     return connection.createStatement(mappedStatement.getResultSetType().getValue(), ResultSet.CONCUR_READ_ONLY);
   }
 
   @Override
   public void parameterize(Statement statement) {
-    // N/A
+    // 空实现
   }
 
 }

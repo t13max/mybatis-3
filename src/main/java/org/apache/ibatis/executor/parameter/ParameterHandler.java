@@ -20,13 +20,16 @@ import java.sql.SQLException;
 
 /**
  * A parameter handler sets the parameters of the {@code PreparedStatement}.
+ * 使用实参替换占位符
  *
  * @author Clinton Begin
  */
 public interface ParameterHandler {
 
+  //用户传入的实参
   Object getParameterObject();
 
+  //使用实参替换占位符
   void setParameters(PreparedStatement ps) throws SQLException;
 
 }

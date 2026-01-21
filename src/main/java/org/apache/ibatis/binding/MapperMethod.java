@@ -253,8 +253,7 @@ public class MapperMethod {
       return type;
     }
 
-    private MappedStatement resolveMappedStatement(Class<?> mapperInterface, String methodName, Class<?> declaringClass,
-                                                   Configuration configuration) {
+    private MappedStatement resolveMappedStatement(Class<?> mapperInterface, String methodName, Class<?> declaringClass, Configuration configuration) {
       String statementId = mapperInterface.getName() + "." + methodName;
       if (configuration.hasStatement(statementId)) {
         return configuration.getMappedStatement(statementId);
@@ -277,15 +276,25 @@ public class MapperMethod {
   //方法签名
   public static class MethodSignature {
 
+    //返回多个
     private final boolean returnsMany;
+    //返回Map
     private final boolean returnsMap;
+    //返回void
     private final boolean returnsVoid;
+    //返回Cursor
     private final boolean returnsCursor;
+    //返回Optional
     private final boolean returnsOptional;
+    //返回类型
     private final Class<?> returnType;
+    //Map的key
     private final String mapKey;
+    //结果处理器参数位置
     private final Integer resultHandlerIndex;
+    //RowBounds参数位置
     private final Integer rowBoundsIndex;
+    //参数名称解析器
     private final ParamNameResolver paramNameResolver;
 
     public MethodSignature(Configuration configuration, Class<?> mapperInterface, Method method) {
@@ -308,6 +317,7 @@ public class MapperMethod {
       this.paramNameResolver = new ParamNameResolver(configuration, method, mapperInterface);
     }
 
+    //转换参数为SQL命令参数
     public Object convertArgsToSqlCommandParam(Object[] args) {
       return paramNameResolver.getNamedParams(args);
     }

@@ -25,6 +25,8 @@ import org.apache.ibatis.session.ResultContext;
 import org.apache.ibatis.session.ResultHandler;
 
 /**
+ * Map 结果处理器
+ *
  * @author Clinton Begin
  */
 public class DefaultMapResultHandler<K, V> implements ResultHandler<V> {
@@ -37,7 +39,7 @@ public class DefaultMapResultHandler<K, V> implements ResultHandler<V> {
 
   @SuppressWarnings("unchecked")
   public DefaultMapResultHandler(String mapKey, ObjectFactory objectFactory, ObjectWrapperFactory objectWrapperFactory,
-      ReflectorFactory reflectorFactory) {
+                                 ReflectorFactory reflectorFactory) {
     this.objectFactory = objectFactory;
     this.objectWrapperFactory = objectWrapperFactory;
     this.reflectorFactory = reflectorFactory;

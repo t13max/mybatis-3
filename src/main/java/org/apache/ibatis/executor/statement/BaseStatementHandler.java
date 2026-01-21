@@ -43,15 +43,16 @@ public abstract class BaseStatementHandler implements StatementHandler {
   protected final TypeHandlerRegistry typeHandlerRegistry;
   protected final ResultSetHandler resultSetHandler;
   protected final ParameterHandler parameterHandler;
-
+  //执行器
   protected final Executor executor;
+  //
   protected final MappedStatement mappedStatement;
+  //记录offset和limit
   protected final RowBounds rowBounds;
 
   protected BoundSql boundSql;
 
-  protected BaseStatementHandler(Executor executor, MappedStatement mappedStatement, Object parameterObject,
-      RowBounds rowBounds, ResultHandler resultHandler, BoundSql boundSql) {
+  protected BaseStatementHandler(Executor executor, MappedStatement mappedStatement, Object parameterObject, RowBounds rowBounds, ResultHandler resultHandler, BoundSql boundSql) {
     this.configuration = mappedStatement.getConfiguration();
     this.executor = executor;
     this.mappedStatement = mappedStatement;
@@ -61,6 +62,7 @@ public abstract class BaseStatementHandler implements StatementHandler {
     this.objectFactory = configuration.getObjectFactory();
 
     if (boundSql == null) { // issue #435, get the key before calculating the statement
+      //其中调用了KeyGenerator的processBefore()方法
       generateKeys(parameterObject);
       boundSql = mappedStatement.getBoundSql(parameterObject);
     }
@@ -69,7 +71,7 @@ public abstract class BaseStatementHandler implements StatementHandler {
 
     this.parameterHandler = configuration.newParameterHandler(mappedStatement, parameterObject, boundSql);
     this.resultSetHandler = configuration.newResultSetHandler(executor, mappedStatement, rowBounds, parameterHandler,
-        resultHandler, boundSql);
+      resultHandler, boundSql);
   }
 
   @Override
@@ -87,7 +89,9 @@ public abstract class BaseStatementHandler implements StatementHandler {
     ErrorContext.instance().sql(boundSql.getSql());
     Statement statement = null;
     try {
+      //实例化一个Statement 子类实现
       statement = instantiateStatement(connection);
+      //设置超时时间
       setStatementTimeout(statement, transactionTimeout);
       setFetchSize(statement);
       return statement;

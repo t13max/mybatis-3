@@ -16,6 +16,8 @@
 package org.apache.ibatis.parsing;
 
 /**
+ * 通用占位符解析器
+ *
  * @author Clinton Begin
  */
 public class GenericTokenParser {
@@ -43,10 +45,13 @@ public class GenericTokenParser {
     int offset = 0;
     final StringBuilder builder = new StringBuilder();
     StringBuilder expression = null;
+    //将${} 转换成正常文本
     do {
       if (start > 0 && src[start - 1] == '\\') {
         // this open token is escaped. remove the backslash and continue.
+        //忽略'\'
         builder.append(src, offset, start - offset - 1).append(openToken);
+        //offset 重新计算进行下一步循环
         offset = start + openToken.length();
       } else {
         // found open token. let's search close token.
@@ -59,6 +64,7 @@ public class GenericTokenParser {
         offset = start + openToken.length();
         int end = text.indexOf(closeToken, offset);
         while (end > -1) {
+          // 遇到`\`该参数不需要处理
           if ((end <= offset) || (src[end - 1] != '\\')) {
             expression.append(src, offset, end - offset);
             break;
@@ -70,9 +76,11 @@ public class GenericTokenParser {
         }
         if (end == -1) {
           // close token was not found.
+          // end == -1 closeToken 不存在,获取后面的所有字符串, openToken - closeToken 之间的内容
           builder.append(src, start, src.length - start);
           offset = src.length;
         } else {
+          // closeToken存在 继续执行
           builder.append(handler.handleToken(expression.toString()));
           offset = end + closeToken.length();
         }
@@ -82,6 +90,7 @@ public class GenericTokenParser {
     if (offset < src.length) {
       builder.append(src, offset, src.length - offset);
     }
+    // 返回的是一个替换后的sql脚本
     return builder.toString();
   }
 }

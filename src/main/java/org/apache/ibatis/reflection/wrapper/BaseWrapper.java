@@ -24,17 +24,23 @@ import org.apache.ibatis.reflection.SystemMetaObject;
 import org.apache.ibatis.reflection.property.PropertyTokenizer;
 
 /**
+ * 对象包装器基类
+ *
  * @author Clinton Begin
  */
 public abstract class BaseWrapper implements ObjectWrapper {
 
+  //静态属性 无参数数组
   protected static final Object[] NO_ARGUMENTS = {};
+
+  //元对象
   protected final MetaObject metaObject;
 
   protected BaseWrapper(MetaObject metaObject) {
     this.metaObject = metaObject;
   }
 
+  //处理集合对象
   protected Object resolveCollection(PropertyTokenizer prop, Object object) {
     if ("".equals(prop.getName())) {
       return object;
@@ -42,14 +48,16 @@ public abstract class BaseWrapper implements ObjectWrapper {
     return metaObject.getValue(prop.getName());
   }
 
+  //获取集合里面的值
   protected Object getCollectionValue(PropertyTokenizer prop, Object collection) {
     if (collection == null) {
-      throw new ReflectionException("Cannot get the value '" + prop.getIndexedName() + "' because the property '"
-          + prop.getName() + "' is null.");
+      throw new ReflectionException("Cannot get the value '" + prop.getIndexedName() + "' because the property '" + prop.getName() + "' is null.");
     }
     if (collection instanceof Map) {
+      // 如果是Map类型，则index为key
       return ((Map) collection).get(prop.getIndex());
     }
+    // index 作为下标直接获取
     int i = Integer.parseInt(prop.getIndex());
     if (collection instanceof List) {
       return ((List) collection).get(i);
@@ -72,15 +80,13 @@ public abstract class BaseWrapper implements ObjectWrapper {
     } else if (collection instanceof short[]) {
       return ((short[]) collection)[i];
     } else {
-      throw new ReflectionException("Cannot get the value '" + prop.getIndexedName() + "' because the property '"
-          + prop.getName() + "' is not Map, List or Array.");
+      throw new ReflectionException("Cannot get the value '" + prop.getIndexedName() + "' because the property '" + prop.getName() + "' is not Map, List or Array.");
     }
   }
 
   protected void setCollectionValue(PropertyTokenizer prop, Object collection, Object value) {
     if (collection == null) {
-      throw new ReflectionException("Cannot set the value '" + prop.getIndexedName() + "' because the property '"
-          + prop.getName() + "' is null.");
+      throw new ReflectionException("Cannot set the value '" + prop.getIndexedName() + "' because the property '" + prop.getName() + "' is null.");
     }
     if (collection instanceof Map) {
       ((Map) collection).put(prop.getIndex(), value);
@@ -107,8 +113,7 @@ public abstract class BaseWrapper implements ObjectWrapper {
       } else if (collection instanceof short[]) {
         ((short[]) collection)[i] = (Short) value;
       } else {
-        throw new ReflectionException("Cannot set the value '" + prop.getIndexedName() + "' because the property '"
-            + prop.getName() + "' is not Map, List or Array.");
+        throw new ReflectionException("Cannot set the value '" + prop.getIndexedName() + "' because the property '" + prop.getName() + "' is not Map, List or Array.");
       }
     }
   }
@@ -132,4 +137,5 @@ public abstract class BaseWrapper implements ObjectWrapper {
     }
     metaValue.setValue(prop.getChildren(), value);
   }
+
 }

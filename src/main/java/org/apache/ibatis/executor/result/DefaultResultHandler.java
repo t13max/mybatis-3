@@ -23,10 +23,13 @@ import org.apache.ibatis.session.ResultContext;
 import org.apache.ibatis.session.ResultHandler;
 
 /**
+ * 结果默认处理器
+ *
  * @author Clinton Begin
  */
 public class DefaultResultHandler implements ResultHandler<Object> {
 
+  //缓存结果
   private final List<Object> list;
 
   public DefaultResultHandler() {

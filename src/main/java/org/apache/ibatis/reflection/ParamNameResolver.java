@@ -36,6 +36,9 @@ import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.ResultHandler;
 import org.apache.ibatis.session.RowBounds;
 
+/**
+ * 注解的扫描工具和处理工具
+ */
 public class ParamNameResolver {
 
   public static final String GENERIC_NAME_PREFIX = "param";
@@ -149,9 +152,7 @@ public class ParamNameResolver {
    * A single non-special parameter is returned without a name. Multiple parameters are named using the naming rule. In
    * addition to the default names, this method also adds the generic names (param1, param2, ...).
    *
-   * @param args
-   *          the args
-   *
+   * @param args the args
    * @return the named params
    */
   public Object getNamedParams(Object[] args) {
@@ -210,13 +211,9 @@ public class ParamNameResolver {
   /**
    * Wrap to a {@link ParamMap} if object is {@link Collection} or array.
    *
-   * @param object
-   *          a parameter object
-   * @param actualParamName
-   *          an actual parameter name (If specify a name, set an object to {@link ParamMap} with specified name)
-   *
+   * @param object          a parameter object
+   * @param actualParamName an actual parameter name (If specify a name, set an object to {@link ParamMap} with specified name)
    * @return a {@link ParamMap}
-   *
    * @since 3.5.5
    */
   public static Object wrapToMapIfCollection(Object object, String actualParamName) {

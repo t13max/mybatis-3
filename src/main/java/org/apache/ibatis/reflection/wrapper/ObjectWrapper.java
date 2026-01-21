@@ -24,44 +24,59 @@ import org.apache.ibatis.reflection.factory.ObjectFactory;
 import org.apache.ibatis.reflection.property.PropertyTokenizer;
 
 /**
+ * 对象包装器接口
+ *
  * @author Clinton Begin
  */
 public interface ObjectWrapper {
 
+  //获取属性值
   Object get(PropertyTokenizer prop);
 
+  //设置属性值
   void set(PropertyTokenizer prop, Object value);
 
+  //获取属性值
   String findProperty(String name, boolean useCamelCaseMapping);
 
+  //获取所有的setter方法名
   String[] getGetterNames();
 
+  //获取所有的getter方法名
   String[] getSetterNames();
 
+  //获取setter方法的参数类型
   Class<?> getSetterType(String name);
 
+  //获取getter方法的返回值类型
   Class<?> getGetterType(String name);
 
+  //获取泛型setter方法的参数类型
   default Entry<Type, Class<?>> getGenericSetterType(String name) {
-    throw new UnsupportedOperationException(
-        "'" + this.getClass() + "' must override the default method 'getGenericSetterType()'.");
+    throw new UnsupportedOperationException("'" + this.getClass() + "' must override the default method 'getGenericSetterType()'.");
   }
 
+  //获取泛型getter方法的返回值类型
   default Entry<Type, Class<?>> getGenericGetterType(String name) {
-    throw new UnsupportedOperationException(
-        "'" + this.getClass() + "' must override the default method 'getGenericGetterType()'.");
+    throw new UnsupportedOperationException("'" + this.getClass() + "' must override the default method 'getGenericGetterType()'.");
   }
 
+  //是否有setter方法
   boolean hasSetter(String name);
 
+  //是否有getter方法
   boolean hasGetter(String name);
 
+  //实例化属性值
   MetaObject instantiatePropertyValue(String name, PropertyTokenizer prop, ObjectFactory objectFactory);
 
+  //是否为集合对象
   boolean isCollection();
 
+  //添加元素到集合中
   void add(Object element);
 
+  //添加多个元素到集合中
   <E> void addAll(List<E> element);
 
 }

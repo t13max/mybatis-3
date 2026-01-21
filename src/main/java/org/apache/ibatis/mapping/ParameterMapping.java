@@ -22,6 +22,8 @@ import org.apache.ibatis.type.JdbcType;
 import org.apache.ibatis.type.TypeHandler;
 
 /**
+ * 参数映射
+ *
  * @author Clinton Begin
  */
 public class ParameterMapping {
@@ -113,7 +115,7 @@ public class ParameterMapping {
     private void validate() {
       if (ResultSet.class.equals(parameterMapping.javaType) && parameterMapping.resultMapId == null) {
         throw new IllegalStateException("Missing resultMap in property '" + parameterMapping.property + "'.  "
-            + "Parameters of type java.sql.ResultSet require a resultMap.");
+          + "Parameters of type java.sql.ResultSet require a resultMap.");
       }
     }
   }

@@ -42,6 +42,8 @@ import org.apache.ibatis.type.TypeHandler;
 import org.apache.ibatis.type.TypeHandlerRegistry;
 
 /**
+ * 默认实现
+ *
  * @author Clinton Begin
  * @author Eduardo Macarron
  */
@@ -86,7 +88,7 @@ public class DefaultParameterHandler implements ParameterHandler {
     return parameterObject;
   }
 
-  @SuppressWarnings({ "rawtypes", "unchecked" })
+  @SuppressWarnings({"rawtypes", "unchecked"})
   @Override
   public void setParameters(PreparedStatement ps) {
     ErrorContext.instance().activity("setting parameters").object(mappedStatement.getParameterMap().getId());
@@ -95,8 +97,10 @@ public class DefaultParameterHandler implements ParameterHandler {
       ParamNameResolver paramNameResolver = mappedStatement.getParamNameResolver();
       for (int i = 0; i < parameterMappings.size(); i++) {
         ParameterMapping parameterMapping = parameterMappings.get(i);
+        //过滤掉存储过程中的输出参数
         if (parameterMapping.getMode() != ParameterMode.OUT) {
           Object value;
+          // 获取参数对应的属性名
           String propertyName = parameterMapping.getProperty();
           JdbcType jdbcType = parameterMapping.getJdbcType();
           JdbcType actualJdbcType = jdbcType == null ? getParamJdbcType(ps, i + 1) : jdbcType;
@@ -122,8 +126,7 @@ public class DefaultParameterHandler implements ParameterHandler {
                   Type actualParamType = paramNameResolver.getType(propertyName);
                   if (actualParamType instanceof Class) {
                     Class<?> actualParamClass = (Class<?>) actualParamType;
-                    MetaClass metaClass = metaClassCache.computeIfAbsent(actualParamClass,
-                        k -> MetaClass.forClass(k, configuration.getReflectorFactory()));
+                    MetaClass metaClass = metaClassCache.computeIfAbsent(actualParamClass, k -> MetaClass.forClass(k, configuration.getReflectorFactory()));
                     PropertyTokenizer propertyTokenizer = new PropertyTokenizer(propertyName);
                     String multiParamsPropertyName;
                     if (propertyTokenizer.hasNext()) {
@@ -141,8 +144,7 @@ public class DefaultParameterHandler implements ParameterHandler {
                 } else {
                   try {
                     propertyGenericType = paramMetaObject.getGenericGetterType(propertyName).getKey();
-                    typeHandler = configuration.getTypeHandlerRegistry().getTypeHandler(propertyGenericType,
-                        actualJdbcType, null);
+                    typeHandler = configuration.getTypeHandlerRegistry().getTypeHandler(propertyGenericType, actualJdbcType, null);
                   } catch (Exception e) {
                     // Not always resolvable
                   }
@@ -168,7 +170,7 @@ public class DefaultParameterHandler implements ParameterHandler {
           }
           if (typeHandler == null) {
             throw new TypeException("Could not find type handler for Java type '" + propertyGenericType.getTypeName()
-                + "' nor JDBC type '" + actualJdbcType + "'");
+              + "' nor JDBC type '" + actualJdbcType + "'");
           }
           try {
             typeHandler.setParameter(ps, i + 1, value, jdbcType);

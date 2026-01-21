@@ -33,6 +33,8 @@ import org.apache.ibatis.reflection.ParamNameResolver;
 import org.apache.ibatis.session.Configuration;
 
 /**
+ * 动态上下文
+ *
  * @author Clinton Begin
  */
 public class DynamicContext {
@@ -61,7 +63,7 @@ public class DynamicContext {
   }
 
   public DynamicContext(Configuration configuration, Object parameterObject, Class<?> parameterType,
-      ParamNameResolver paramNameResolver, boolean paramExists) {
+                        ParamNameResolver paramNameResolver, boolean paramExists) {
     if (parameterObject == null || parameterObject instanceof Map) {
       bindings = new ContextMap(null, false);
     } else {
@@ -97,7 +99,7 @@ public class DynamicContext {
   private void initTokenParser(List<ParameterMapping> parameterMappings) {
     if (tokenParser == null) {
       tokenHandler = new ParameterMappingTokenHandler(parameterMappings != null ? parameterMappings : new ArrayList<>(),
-          configuration, parameterObject, parameterType, bindings, paramNameResolver, paramExists);
+        configuration, parameterObject, parameterType, bindings, paramNameResolver, paramExists);
       tokenParser = new GenericTokenParser("#{", "}", tokenHandler);
     }
   }

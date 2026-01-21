@@ -44,11 +44,15 @@ public class BeanWrapper extends BaseWrapper {
 
   @Override
   public Object get(PropertyTokenizer prop) {
+
     if (prop.hasNext()) {
       return getChildValue(prop);
+      //索引不为空
     } else if (prop.getIndex() != null) {
+      //实例化集合对象
       return getCollectionValue(prop, resolveCollection(prop, object));
     } else {
+      //没有索引
       return getBeanProperty(prop, object);
     }
   }
@@ -173,18 +177,17 @@ public class BeanWrapper extends BaseWrapper {
     Class<?> type = getSetterType(prop.getName());
     try {
       Object newObject = objectFactory.create(type);
-      metaValue = MetaObject.forObject(newObject, metaObject.getObjectFactory(), metaObject.getObjectWrapperFactory(),
-          metaObject.getReflectorFactory());
+      metaValue = MetaObject.forObject(newObject, metaObject.getObjectFactory(), metaObject.getObjectWrapperFactory(), metaObject.getReflectorFactory());
       set(prop, newObject);
     } catch (Exception e) {
-      throw new ReflectionException("Cannot set value of property '" + name + "' because '" + name
-          + "' is null and cannot be instantiated on instance of " + type.getName() + ". Cause:" + e.toString(), e);
+      throw new ReflectionException("Cannot set value of property '" + name + "' because '" + name + "' is null and cannot be instantiated on instance of " + type.getName() + ". Cause:" + e.toString(), e);
     }
     return metaValue;
   }
 
   private Object getBeanProperty(PropertyTokenizer prop, Object object) {
     try {
+      //获取get方法
       Invoker method = metaClass.getGetInvoker(prop.getName());
       try {
         return method.invoke(object, NO_ARGUMENTS);
@@ -194,23 +197,21 @@ public class BeanWrapper extends BaseWrapper {
     } catch (RuntimeException e) {
       throw e;
     } catch (Throwable t) {
-      throw new ReflectionException(
-          "Could not get property '" + prop.getName() + "' from " + object.getClass() + ".  Cause: " + t.toString(), t);
+      throw new ReflectionException("Could not get property '" + prop.getName() + "' from " + object.getClass() + ".  Cause: " + t.toString(), t);
     }
   }
 
   private void setBeanProperty(PropertyTokenizer prop, Object object, Object value) {
     try {
       Invoker method = metaClass.getSetInvoker(prop.getName());
-      Object[] params = { value };
+      Object[] params = {value};
       try {
         method.invoke(object, params);
       } catch (Throwable t) {
         throw ExceptionUtil.unwrapThrowable(t);
       }
     } catch (Throwable t) {
-      throw new ReflectionException("Could not set property '" + prop.getName() + "' of '" + object.getClass()
-          + "' with value '" + value + "' Cause: " + t.toString(), t);
+      throw new ReflectionException("Could not set property '" + prop.getName() + "' of '" + object.getClass() + "' with value '" + value + "' Cause: " + t.toString(), t);
     }
   }
 
