@@ -37,7 +37,7 @@ import org.apache.ibatis.session.ResultHandler;
 import org.apache.ibatis.session.RowBounds;
 
 /**
- * 注解的扫描工具和处理工具
+ * Mapper方法参数解析器
  */
 public class ParamNameResolver {
 
@@ -51,6 +51,7 @@ public class ParamNameResolver {
     }
   }
 
+  //使用参数名称
   private final boolean useActualParamName;
 
   /**
@@ -58,6 +59,7 @@ public class ParamNameResolver {
    * The name is obtained from {@link Param} if specified. When {@link Param} is not specified, the parameter index is
    * used. Note that this index could be different from the actual index when the method has special parameters (i.e.
    * {@link RowBounds} or {@link ResultHandler}).
+   * 参数名称集合
    * <ul>
    * <li>aMethod(@Param("M") int a, @Param("N") int b) -&gt; {{0, "M"}, {1, "N"}}</li>
    * <li>aMethod(int a, int b) -&gt; {{0, "0"}, {1, "1"}}</li>
@@ -67,31 +69,38 @@ public class ParamNameResolver {
   private final SortedMap<Integer, String> names;
   private final Map<String, Type> typeMap = new HashMap<>();
 
+  //存在@Param注解
   private boolean hasParamAnnotation;
   private boolean useParamMap;
 
   public ParamNameResolver(Configuration config, Method method, Class<?> mapperClass) {
     this.useActualParamName = config.isUseActualParamName();
+    //方法参数类型
     final Class<?>[] paramTypes = method.getParameterTypes();
     final Annotation[][] paramAnnotations = method.getParameterAnnotations();
+    //参数索引与名称映射
     final SortedMap<Integer, String> map = new TreeMap<>();
+    //解析参数类型
     Type[] actualParamTypes = TypeParameterResolver.resolveParamTypes(method, mapperClass);
     int paramCount = paramAnnotations.length;
     // get names from @Param annotations
     for (int paramIndex = 0; paramIndex < paramCount; paramIndex++) {
       if (isSpecialParameter(paramTypes[paramIndex])) {
-        // skip special parameters
+        // 跳过特殊参数
         continue;
       }
       String name = null;
+      //遍历注解找到@Param
       for (Annotation annotation : paramAnnotations[paramIndex]) {
         if (annotation instanceof Param) {
           hasParamAnnotation = true;
           useParamMap = true;
+          //拿到@Param的值作为参数名称
           name = ((Param) annotation).value();
           break;
         }
       }
+      //没写@Param
       if (name == null) {
         // @Param was not specified.
         if (useActualParamName) {
@@ -110,6 +119,7 @@ public class ParamNameResolver {
     if (names.size() > 1) {
       useParamMap = true;
     }
+    //集合与数组类型
     if (names.size() == 1) {
       Type soleParamType = actualParamTypes[0];
       if (soleParamType instanceof GenericArrayType) {
@@ -135,6 +145,7 @@ public class ParamNameResolver {
     return ParamNameUtil.getParamNames(method).get(paramIndex);
   }
 
+  //是否为特殊参数 RowBounds或ResultHandler
   private static boolean isSpecialParameter(Class<?> clazz) {
     return RowBounds.class.isAssignableFrom(clazz) || ResultHandler.class.isAssignableFrom(clazz);
   }
